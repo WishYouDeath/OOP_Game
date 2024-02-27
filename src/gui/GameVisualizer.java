@@ -30,7 +30,7 @@ public class GameVisualizer extends JPanel
     private volatile int m_targetPositionX = 150;
     private volatile int m_targetPositionY = 100;
     
-    private static final double maxVelocity = 0.105;//0.1 было
+    private static final double maxVelocity = 0.15;//0.1 было
     private static final double maxAngularVelocity = 0.00105;
 
     public GameVisualizer()
@@ -62,7 +62,7 @@ public class GameVisualizer extends JPanel
         });
         setDoubleBuffered(true);
     }
-
+    private static final int BORDER_BUFFER = 6; // Отступ от границы в пикселях
     protected void setTargetPosition(Point p)
     {
         m_targetPositionX = p.x;
@@ -93,7 +93,7 @@ public class GameVisualizer extends JPanel
     {
         double distance = distance(m_targetPositionX, m_targetPositionY,
             m_robotPositionX, m_robotPositionY);
-        if (distance < 0.5)
+        if (distance < 7)
         {
             return;
         }
@@ -120,58 +120,34 @@ public class GameVisualizer extends JPanel
             return max;
         return value;
     }
-    private static final double BORDER_BUFFER = 7.5; // Отступ от границы в пикселях
-
-    private void moveRobot(double velocity, double angularVelocity, double duration) //Изменил метод
-    {
-        velocity = applyLimits(velocity, 0, maxVelocity); //Ограничение скорости робота
+    private void moveRobot(double velocity, double angularVelocity, double duration) {
+        velocity = applyLimits(velocity, 0, maxVelocity);//Ограничение скорости робота
         angularVelocity = applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);//Ограничение  угла поворота
-        double newX = m_robotPositionX + velocity / angularVelocity *
-                (Math.sin(m_robotDirection  + angularVelocity * duration) -
-                        Math.sin(m_robotDirection));
-        if (!Double.isFinite(newX))//Если значения не определены то считаем проще
-        {
-            newX = m_robotPositionX + velocity * duration * Math.cos(m_robotDirection);
+
+        m_robotDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);//Направление робота
+
+        double distanceToMove = velocity * duration;//Дистанция до цели
+        double newX = m_robotPositionX + Math.cos(m_robotDirection) * distanceToMove;
+        double newY = m_robotPositionY + Math.sin(m_robotDirection) * distanceToMove;
+
+        if (newX < BORDER_BUFFER) {
+            newX = BORDER_BUFFER;//Ограничиваем движение робота влево
+            m_robotDirection = Math.PI - m_robotDirection;//Меняем направление робота (отражаем его)
+        } else if (newX > getWidth() - BORDER_BUFFER) {
+            newX = getWidth() - BORDER_BUFFER;//Ограничиваем движение робота вправо
+            m_robotDirection = Math.PI - m_robotDirection;
         }
-        double newY = m_robotPositionY - velocity / angularVelocity *
-                (Math.cos(m_robotDirection  + angularVelocity * duration) -
-                        Math.cos(m_robotDirection));
-        if (!Double.isFinite(newY))
-        {
-            newY = m_robotPositionY + velocity * duration * Math.sin(m_robotDirection);
+
+        if (newY < BORDER_BUFFER) {
+            newY = BORDER_BUFFER;//Ограничиваем движение робота вниз
+            m_robotDirection = Math.PI + m_robotDirection;
+        } else if (newY > getHeight() - BORDER_BUFFER) {
+            newY = getHeight() - BORDER_BUFFER;//Ограничиваем движение робота вверх
+            m_robotDirection = Math.PI + m_robotDirection;
         }
-        m_robotPositionX = newX;//Обновляем координаты робота
+
+        m_robotPositionX = newX;//Присваиваем новые значения для робота
         m_robotPositionY = newY;
-
-        // Проверка на столкновение с границей
-        boolean hitLeftBorder = m_robotPositionX < BORDER_BUFFER;
-        boolean hitRightBorder = m_robotPositionX > getWidth() - BORDER_BUFFER;
-        boolean hitTopBorder = m_robotPositionY < BORDER_BUFFER;
-        boolean hitBottomBorder = m_robotPositionY > getHeight() - BORDER_BUFFER;
-
-        if (hitLeftBorder || hitRightBorder || hitTopBorder || hitBottomBorder)
-        {
-            //Изменение направления робота, если он столкнулся с границей
-            if (hitLeftBorder)
-            {
-                m_robotDirection = Math.PI - m_robotDirection;
-            }
-            if (hitRightBorder)
-            {
-                m_robotDirection = Math.PI - m_robotDirection;
-            }
-            if (hitTopBorder)
-            {
-                m_robotDirection = Math.PI + m_robotDirection;//Так меньше всего багов при разных постановках еды
-            }
-            if (hitBottomBorder)
-            {
-                m_robotDirection = Math.PI + m_robotDirection;
-            }
-        }
-
-        double newDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);//Вычисляем новое направление робота
-        m_robotDirection = newDirection;
     }
 
     private static double asNormalizedRadians(double angle)
@@ -210,7 +186,6 @@ public class GameVisualizer extends JPanel
     {
         g.drawOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
     }
-    
     private void drawRobot(Graphics2D g, int x, int y, double direction)
     {
         int robotCenterX = round(m_robotPositionX); 

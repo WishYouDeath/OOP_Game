@@ -50,7 +50,7 @@ public class MainApplicationFrame extends JFrame
     protected LogWindow createLogWindow()//Работа с журналом
     {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
-        logWindow.setLocation(10,10);
+        logWindow.setLocation(1000,0);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
         logWindow.pack();
