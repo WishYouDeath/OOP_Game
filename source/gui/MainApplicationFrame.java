@@ -106,6 +106,7 @@ public class MainApplicationFrame extends JFrame
         return menuBar;
     }
 
+
     private JMenu createLookAndFeelMenu()
     {
         JMenu menu = new JMenu("Режим отображения");
