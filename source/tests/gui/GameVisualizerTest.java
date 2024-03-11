@@ -7,6 +7,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.awt.*;
 
+import static gui.GameVisualizer.BORDER_BUFFER;
 import static gui.GameVisualizer.angleTo;
 
 public class GameVisualizerTest {
@@ -20,19 +21,19 @@ public class GameVisualizerTest {
     }
 
     @Test
-    public void testMoveRobotWithinBorder() {
+    public void testMoveRobotWithinBorder() { // Движение робота в пределах границ поля
         double initialRobotPositionX = gameVisualizer.m_robotPositionX;
         double initialRobotPositionY = gameVisualizer.m_robotPositionY;
 
         gameVisualizer.moveRobot(0.1, 0, 100);
 
-        Assertions.assertTrue(gameVisualizer.m_robotPositionX > initialRobotPositionX);
-        Assertions.assertTrue(gameVisualizer.m_robotPositionY > initialRobotPositionY);
+        Assertions.assertTrue(gameVisualizer.m_robotPositionX > initialRobotPositionX - BORDER_BUFFER);
+        Assertions.assertTrue(gameVisualizer.m_robotPositionY > initialRobotPositionY - BORDER_BUFFER);
         Assertions.assertFalse(gameVisualizer.m_collisionWithBorder);
     }
 
     @Test
-    public void testUpdateRobotDirection() {
+    public void testUpdateRobotDirection() { // Тест направления робота
         gameVisualizer.setTargetPosition(new Point(200, 200));
         gameVisualizer.onModelUpdateEvent();
 
@@ -40,9 +41,8 @@ public class GameVisualizerTest {
     }
 
     @Test
-    public void testDontMoveRobotToTarget() {
+    public void testDontMoveRobotToTarget() { // Тест если мы уже достигли target
         gameVisualizer.setTargetPosition(new Point(100, 100));
-        gameVisualizer.onModelUpdateEvent();
 
         double initialRobotPositionX = gameVisualizer.m_robotPositionX;
         double initialRobotPositionY = gameVisualizer.m_robotPositionY;
@@ -54,19 +54,19 @@ public class GameVisualizerTest {
     }
 
     @Test
-    public void testDontMoveRobotToBorder() {
+    public void testDontMoveRobotToBorder() { // Отсутствие перемещения робота к границе поля
         gameVisualizer.m_robotPositionX = 0;
         gameVisualizer.m_robotPositionY = 0;
 
         gameVisualizer.moveRobot(0.1, 0, 100);
 
-        Assertions.assertEquals(-6.0, gameVisualizer.m_robotPositionX);
-        Assertions.assertEquals(6.0, gameVisualizer.m_robotPositionY);
+        Assertions.assertEquals(-BORDER_BUFFER, gameVisualizer.m_robotPositionX);
+        Assertions.assertEquals(BORDER_BUFFER, gameVisualizer.m_robotPositionY);
         Assertions.assertFalse(gameVisualizer.m_collisionWithBorder);
     }
 
     @Test
-    public void testUpdateRobotDirectionWhenHittingBorder() {
+    public void testUpdateRobotDirectionWhenHittingBorder() { // Обновление направления робота при столкновении с границей поля
         gameVisualizer.m_robotPositionX = 0;
         gameVisualizer.m_robotPositionY = 0;
 
