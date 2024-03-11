@@ -1,5 +1,4 @@
 package gui;
-
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
@@ -16,19 +15,20 @@ import javax.swing.JPanel;
 public class GameVisualizer extends JPanel
 {
     private final Timer m_timer = initTimer();
-    
+    public boolean m_collisionWithBorder;
+
     private static Timer initTimer() 
     {
         Timer timer = new Timer("events generator", true);
         return timer;
     }
     
-    private volatile double m_robotPositionX = 100;
-    private volatile double m_robotPositionY = 100; 
-    private volatile double m_robotDirection = 0; 
+    public volatile double m_robotPositionX = 100;
+    public volatile double m_robotPositionY = 100;
+    public volatile double m_robotDirection = 0;
 
-    private volatile int m_targetPositionX = 150;
-    private volatile int m_targetPositionY = 100;
+    public volatile int m_targetPositionX = 150;
+    public volatile int m_targetPositionY = 100;
     
     private static final double maxVelocity = 0.15;//0.1 было
     private static final double maxAngularVelocity = 0.00105;
@@ -62,8 +62,8 @@ public class GameVisualizer extends JPanel
         });
         setDoubleBuffered(true);
     }
-    private static final int BORDER_BUFFER = 6; // Отступ от границы в пикселях
-    protected void setTargetPosition(Point p)
+    public static final int BORDER_BUFFER = 6; // Отступ от границы в пикселях
+    public void setTargetPosition(Point p)
     {
         m_targetPositionX = p.x;
         m_targetPositionY = p.y;
@@ -81,7 +81,7 @@ public class GameVisualizer extends JPanel
         return Math.sqrt(diffX * diffX + diffY * diffY);
     }
     
-    private static double angleTo(double fromX, double fromY, double toX, double toY)
+    public static double angleTo(double fromX, double fromY, double toX, double toY)
     {
         double diffX = toX - fromX;
         double diffY = toY - fromY;
@@ -89,7 +89,7 @@ public class GameVisualizer extends JPanel
         return asNormalizedRadians(Math.atan2(diffY, diffX));
     }
 
-    protected void onModelUpdateEvent()
+    public void onModelUpdateEvent()
     {
         double distance = distance(m_targetPositionX, m_targetPositionY,
             m_robotPositionX, m_robotPositionY);
@@ -120,12 +120,12 @@ public class GameVisualizer extends JPanel
             return max;
         return value;
     }
-    private void moveRobot(double velocity, double angularVelocity, double duration) {
+
+    public void moveRobot(double velocity, double angularVelocity, double duration) {
         velocity = applyLimits(velocity, 0, maxVelocity);//Ограничение скорости робота
         angularVelocity = applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);//Ограничение  угла поворота
 
         m_robotDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);//Направление робота
-
         double distanceToMove = velocity * duration;//Дистанция до цели
         double newX = m_robotPositionX + Math.cos(m_robotDirection) * distanceToMove;
         double newY = m_robotPositionY + Math.sin(m_robotDirection) * distanceToMove;
