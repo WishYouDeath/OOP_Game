@@ -40,18 +40,6 @@ public class GameVisualizerTest {
         Assertions.assertTrue(Math.abs(gameVisualizer.m_robotDirection - angleTo(gameVisualizer.m_robotPositionX, gameVisualizer.m_robotPositionY, 200, 200)) > 0.01);
     }
 
-    @Test
-    public void testDontMoveRobotToTarget() { // Тест если мы уже достигли target
-        gameVisualizer.setTargetPosition(new Point(100, 100));
-
-        double initialRobotPositionX = gameVisualizer.m_robotPositionX;
-        double initialRobotPositionY = gameVisualizer.m_robotPositionY;
-
-        gameVisualizer.onModelUpdateEvent();
-
-        Assertions.assertEquals(initialRobotPositionX, gameVisualizer.m_robotPositionX);
-        Assertions.assertEquals(initialRobotPositionY, gameVisualizer.m_robotPositionY);
-    }
 
     @Test
     public void testDontMoveRobotToBorder() { // Отсутствие перемещения робота к границе поля

@@ -10,26 +10,28 @@ import java.awt.geom.AffineTransform;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.JPanel;
+
 public class GameVisualizer extends JPanel
 {
-    private final Timer m_timer = initTimer();
-    public boolean m_collisionWithBorder;
+    public boolean m_collisionWithBorder;  // Было ли столкновение с границей
+
     private static Timer initTimer()
     {
-        Timer timer = new Timer("events generator", true);
-        return timer;
+        return new Timer("events generator", true);
     }
 
     public volatile double m_robotPositionX = 100;
     public volatile double m_robotPositionY = 100;
-    public volatile double m_robotDirection = 0;
-    public volatile int m_targetPositionX = 150;
-    public volatile int m_targetPositionY = 100;
+    public double m_robotDirection = 0;
+    public int m_targetPositionX = 150;
+    public int m_targetPositionY = 100;
 
     private static final double maxVelocity = 0.1;
     private static final double maxAngularVelocity = 0.00105;
+
     public GameVisualizer()
     {
+        Timer m_timer = initTimer();
         m_timer.schedule(new TimerTask()
         {
             @Override
@@ -37,7 +39,7 @@ public class GameVisualizer extends JPanel
             {
                 onRedrawEvent();
             }
-        }, 0, 50);
+        }, 0, 8);
         m_timer.schedule(new TimerTask()
         {
             @Override
@@ -45,19 +47,19 @@ public class GameVisualizer extends JPanel
             {
                 onModelUpdateEvent();
             }
-        }, 0, 10);
-        addMouseListener(new MouseAdapter()
-        {
+        }, 0, 8);
+
+        addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 setTargetPosition(e.getPoint());
                 repaint();
             }
         });
-        setDoubleBuffered(true);
     }
+
     public static final double BORDER_BUFFER = 3.5; // Отступ от границы в пикселях
+
     public void setTargetPosition(Point p)
     {
         m_targetPositionX = p.x;
@@ -84,15 +86,19 @@ public class GameVisualizer extends JPanel
     }
     public void onModelUpdateEvent()
     {
+        m_targetPositionX = (int) applyLimits(m_targetPositionX, 0, this.getWidth()); // Чтоб таргет не уходил за диапазон
+        m_targetPositionY = (int) applyLimits(m_targetPositionY, 0, this.getHeight());
+
         double distance = distance(m_targetPositionX, m_targetPositionY,
                 m_robotPositionX, m_robotPositionY);
         if (distance < 7)
         {
             return;
         }
-        double velocity = maxVelocity;
+
         double angleToTarget = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
         double angularVelocity = 0;
+
         if (angleToTarget > m_robotDirection)
         {
             angularVelocity = maxAngularVelocity;
@@ -101,24 +107,27 @@ public class GameVisualizer extends JPanel
         {
             angularVelocity = -maxAngularVelocity;
         }
-        moveRobot(velocity, angularVelocity, 10);
+
+        moveRobot(maxVelocity, angularVelocity, 10);
     }
 
     private static double applyLimits(double value, double min, double max)
     {
         if (value < min)
             return min;
-        if (value > max)
-            return max;
-        return value;
+        return Math.min(value, max);
     }
+
     public void moveRobot(double velocity, double angularVelocity, double duration) {
+
         velocity = applyLimits(velocity, 0, maxVelocity);//Ограничение скорости робота
         angularVelocity = applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);//Ограничение  угла поворота
         m_robotDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);//Направление робота
+
         double distanceToMove = velocity * duration;//Дистанция до цели
         double newX = m_robotPositionX + Math.cos(m_robotDirection) * distanceToMove;
         double newY = m_robotPositionY + Math.sin(m_robotDirection) * distanceToMove;
+
         if (newX < BORDER_BUFFER) {
             newX = BORDER_BUFFER;//Ограничиваем движение робота влево
             m_robotDirection = Math.PI - m_robotDirection;//Меняем направление робота (отражаем его)
@@ -135,7 +144,7 @@ public class GameVisualizer extends JPanel
         }
         m_robotPositionX = newX;//Присваиваем новые значения для робота
         m_robotPositionY = newY;
-        if (0 <= m_robotPositionX && m_robotPositionX <= 400 && 0 <= m_robotPositionY && m_robotPositionY <= 400){
+        if (0 <= m_robotPositionX && m_robotPositionX <= this.getWidth() && 0 <= m_robotPositionY && m_robotPositionY <= getHeight()){
             m_collisionWithBorder = false;
         }
 
@@ -163,7 +172,7 @@ public class GameVisualizer extends JPanel
     {
         super.paint(g);
         Graphics2D g2d = (Graphics2D)g;
-        drawRobot(g2d, round(m_robotPositionX), round(m_robotPositionY), m_robotDirection);
+        drawRobot(g2d, m_robotDirection);
         drawTarget(g2d, m_targetPositionX, m_targetPositionY);
     }
 
@@ -176,7 +185,7 @@ public class GameVisualizer extends JPanel
     {
         g.drawOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
     }
-    private void drawRobot(Graphics2D g, int x, int y, double direction)
+    private void drawRobot(Graphics2D g, double direction)
     {
         int robotCenterX = round(m_robotPositionX);
         int robotCenterY = round(m_robotPositionY);
