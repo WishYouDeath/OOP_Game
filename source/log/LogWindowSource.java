@@ -45,8 +45,10 @@ public class LogWindowSource {
 
     public void append(LogLevel logLevel, String strMessage) { // Добавление новой записи в логи
         LogEntry entry = new LogEntry(logLevel, strMessage);
-        if (m_messages.size() >= m_iQueueLength) {
-            m_messages.poll(); // Если очередь уже заполнена, то удаляем самое старое сообщение
+        synchronized (m_messages) {
+            if (m_messages.size() >= m_iQueueLength) {
+                m_messages.poll(); // Если очередь уже заполнена, то удаляем самое старое сообщение
+            }
         }
         m_messages.offer(entry); // Вставлям новое сообщение
         notifyListeners(); // Уведомляем всех слушателей о новой записи
