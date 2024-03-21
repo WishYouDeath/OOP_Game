@@ -5,6 +5,8 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
@@ -12,12 +14,6 @@ import javax.swing.event.InternalFrameEvent;
 
 import log.Logger;
 
-/**
- * Что требуется сделать:
- * 1. Метод создания меню перегружен функционалом и трудно читается.
- * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
- *
- */
 public class MainApplicationFrame extends JFrame
 {
     private final JDesktopPane desktopPane = new JDesktopPane();
@@ -45,20 +41,24 @@ public class MainApplicationFrame extends JFrame
                 if (confirmClosing[0]) {
                     return;
                 }
-                int result = JOptionPane.showConfirmDialog(
-                        MainApplicationFrame.this,
-                        "Вы уверены, что хотите закрыть приложение?",
-                        "Подтвердите выход",
+                Object[] options = {getLocalizedString("confirm.closing.YES"), getLocalizedString("confirm.closing.NO")};
+                int result = JOptionPane.showOptionDialog(
+                        MainApplicationFrame.this, // передаем текущий фрейм в качестве родительского компонента
+                        getLocalizedString("confirm.closing.question"),
+                        getLocalizedString("confirm.closing.title"),
                         JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE);
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0] // return value for YES
+                );
 
                 if (result == JOptionPane.NO_OPTION) {
-                    confirmClosing[0] = false; // сбросить флаг
+                    confirmClosing[0] = false;
                     return;
                 }
 
                 dispose();
-                System.exit(0);
             }
         });
     }
@@ -75,7 +75,7 @@ public class MainApplicationFrame extends JFrame
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
         logWindow.pack();
-        Logger.debug("Протокол работает");
+        Logger.debug(getLocalizedString("main.application.frame.working.protocol"));
         return logWindow;
     }
 
@@ -126,10 +126,10 @@ public class MainApplicationFrame extends JFrame
 
     private JMenu createLookAndFeelMenu()
     {
-        JMenu menu = new JMenu("Режим отображения");
+        JMenu menu = new JMenu(getLocalizedString("main.application.frame.display.mode"));
         menu.setMnemonic(KeyEvent.VK_V);
         menu.getAccessibleContext().setAccessibleDescription(
-                "Управление режимом отображения приложения");
+                getLocalizedString("main.application.frame.managing.display.mode"));
 
         JMenuItem systemLookAndFeel = createSystemLookAndFeelMenuItem();
         menu.add(systemLookAndFeel);
@@ -142,7 +142,7 @@ public class MainApplicationFrame extends JFrame
 
     private JMenuItem createSystemLookAndFeelMenuItem()
     {
-        JMenuItem menuItem = new JMenuItem("Системная схема", KeyEvent.VK_S);
+        JMenuItem menuItem = new JMenuItem(getLocalizedString("main.application.frame.system.diagram"), KeyEvent.VK_S);
         menuItem.addActionListener((event) -> {
             setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             this.invalidate();
@@ -152,7 +152,7 @@ public class MainApplicationFrame extends JFrame
 
     private JMenuItem createCrossplatformLookAndFeelMenuItem()
     {
-        JMenuItem menuItem = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
+        JMenuItem menuItem = new JMenuItem(getLocalizedString("main.application.frame.universal.scheme"), KeyEvent.VK_S);
         menuItem.addActionListener((event) -> {
             setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             this.invalidate();
@@ -162,10 +162,10 @@ public class MainApplicationFrame extends JFrame
 
     private JMenu createTestMenu()
     {
-        JMenu menu = new JMenu("Тесты");
+        JMenu menu = new JMenu(getLocalizedString("main.application.frame.tests"));
         menu.setMnemonic(KeyEvent.VK_T);
         menu.getAccessibleContext().setAccessibleDescription(
-                "Тестовые команды");
+                getLocalizedString("main.application.frame.test.commands"));
 
         JMenuItem addLogMessageItem = createAddLogMessageItem();
         menu.add(addLogMessageItem);
@@ -175,9 +175,9 @@ public class MainApplicationFrame extends JFrame
 
     private JMenuItem createAddLogMessageItem()
     {
-        JMenuItem menuItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
+        JMenuItem menuItem = new JMenuItem(getLocalizedString("main.application.frame.message.in.log"), KeyEvent.VK_S);
         menuItem.addActionListener((event) -> {
-            Logger.debug("Новая строка");
+            Logger.debug(getLocalizedString("main.application.frame.new.line"));
         });
         return menuItem;
     }
@@ -194,5 +194,18 @@ public class MainApplicationFrame extends JFrame
         {
             // just ignore
         }
+    }
+
+    private static ResourceBundle getBundle(String baseName, Locale locale) {
+        return ResourceBundle.getBundle(baseName, locale);
+    }
+
+    private String getLocalizedString(String key) {
+        ResourceBundle bundle = getBundle("gui.resources.messages", getLocale());
+        return bundle.getString(key);
+    }
+
+    public Locale getLocale() {
+        return Locale.getDefault();
     }
 }

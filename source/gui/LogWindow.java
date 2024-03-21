@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import java.awt.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class LogWindow extends JInternalFrame implements LogChangeListener {
     private LogWindowSource m_logSource;
@@ -22,6 +24,7 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
         m_logContent = new TextArea("");
         m_logContent.setSize(200, 500);
         setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
+        setTitle(getLocalizedString("log.window.title"));
         addInternalFrameListener(new InternalFrameListener() {
 
             @Override
@@ -34,12 +37,17 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
                 if (confirmClosing[0]) {
                     return;
                 }
-                int result = JOptionPane.showConfirmDialog(
-                        LogWindow.this,
-                        "Вы уверены, что хотите закрыть приложение?",
-                        "Подтвердите выход",
+                Object[] options = {getLocalizedString("confirm.closing.YES"), getLocalizedString("confirm.closing.NO")};
+                int result = JOptionPane.showOptionDialog(
+                        LogWindow.this, // передаем текущий фрейм в качестве родительского компонента
+                        getLocalizedString("confirm.closing.question"),
+                        getLocalizedString("confirm.closing.title"),
                         JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE);
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0] // return value for YES
+                );
 
                 if (result == JOptionPane.NO_OPTION) {
                     confirmClosing[0] = false;
@@ -79,6 +87,19 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
         }
         m_logContent.setText(content.toString());
         m_logContent.invalidate();
+    }
+
+    private static ResourceBundle getBundle(String baseName, Locale locale) {
+        return ResourceBundle.getBundle(baseName, locale);
+    }
+
+    private String getLocalizedString(String key) {
+        ResourceBundle bundle = getBundle("gui.resources.messages", getLocale());
+        return bundle.getString(key);
+    }
+
+    public Locale getLocale() {
+        return Locale.getDefault();
     }
 
     @Override
