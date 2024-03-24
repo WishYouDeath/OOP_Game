@@ -46,7 +46,7 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
                         JOptionPane.QUESTION_MESSAGE,
                         null,
                         options,
-                        options[0] // return value for YES
+                        options[0] // Возвращает значение для YES
                 );
 
                 if (result == JOptionPane.NO_OPTION) {
