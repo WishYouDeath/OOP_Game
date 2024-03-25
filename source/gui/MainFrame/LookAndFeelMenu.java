@@ -5,13 +5,13 @@ import javax.swing.JMenu;
 import javax.swing.UIManager;
 import java.awt.event.KeyEvent;
 
-public class LookAndFeelMenu {
+public class LookAndFeelMenu { //Класс, представляющий меню выбора внешнего вида приложения.
 
     public static JMenu createLookAndFeelMenu(String title, MainApplicationFrame mainApplicationFrame) {
         JMenu menu = new JMenu(title);
         menu.setMnemonic(KeyEvent.VK_V);
-        menu.getAccessibleContext().setAccessibleDescription(mainApplicationFrame.getLocalizedString("main.application.frame.managing.display.mode",mainApplicationFrame.getLocale()));
-
+        menu.getAccessibleContext().setAccessibleDescription(MainApplicationFrame.getLocalizedString("main.application.frame.managing.display.mode", mainApplicationFrame.getLocale()));
+        //Режим отображения
         JMenuItem systemLookAndFeel = createSystemLookAndFeelMenuItem(mainApplicationFrame);
         menu.add(systemLookAndFeel);
 
@@ -21,8 +21,8 @@ public class LookAndFeelMenu {
         return menu;
     }
 
-    private static JMenuItem createSystemLookAndFeelMenuItem(MainApplicationFrame mainApplicationFrame) {
-        JMenuItem menuItem = new JMenuItem(mainApplicationFrame.getLocalizedString("main.application.frame.system.diagram", mainApplicationFrame.getLocale()), KeyEvent.VK_S);
+    private static JMenuItem createSystemLookAndFeelMenuItem(MainApplicationFrame mainApplicationFrame) {// Системная схема
+        JMenuItem menuItem = new JMenuItem(MainApplicationFrame.getLocalizedString("main.application.frame.system.diagram", mainApplicationFrame.getLocale()), KeyEvent.VK_S);
         menuItem.addActionListener((event) -> {
             mainApplicationFrame.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             mainApplicationFrame.invalidate();
@@ -30,8 +30,8 @@ public class LookAndFeelMenu {
         return menuItem;
     }
 
-    private static JMenuItem createCrossplatformLookAndFeelMenuItem(MainApplicationFrame mainApplicationFrame) {
-        JMenuItem menuItem = new JMenuItem(mainApplicationFrame.getLocalizedString("main.application.frame.universal.scheme", mainApplicationFrame.getLocale()), KeyEvent.VK_S);
+    private static JMenuItem createCrossplatformLookAndFeelMenuItem(MainApplicationFrame mainApplicationFrame) { // Универсальная схема
+        JMenuItem menuItem = new JMenuItem(MainApplicationFrame.getLocalizedString("main.application.frame.universal.scheme", mainApplicationFrame.getLocale()), KeyEvent.VK_S);
         menuItem.addActionListener((event) -> {
             mainApplicationFrame.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             mainApplicationFrame.invalidate();

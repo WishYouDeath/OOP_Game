@@ -12,48 +12,47 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class LogWindow extends JInternalFrame implements LogChangeListener {
-    private LogWindowSource m_logSource;
-    private TextArea m_logContent;
+    private final LogWindowSource m_logSource; // Источник логов
+    private final TextArea m_logContent; // Компонент для отображения логов
 
-    private final boolean[] confirmClosing = {false};
+    private final boolean[] confirmClosing = {false}; // Флаг подтверждения закрытия окна
 
+    // Конструктор класса LogWindow
     public LogWindow(LogWindowSource logSource) {
         super("Протокол работы", true, true, true, true);
         m_logSource = logSource;
-        m_logSource.registerListener(this);
+        m_logSource.registerListener(this); // Регистрация слушателя
         m_logContent = new TextArea("");
         m_logContent.setSize(200, 500);
         setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
-        setTitle(getLocalizedString("log.window.title"));
+        setTitle(getLocalizedString("log.window.title")); // Устанавливаем имя окну
         addInternalFrameListener(new InternalFrameListener() {
 
             @Override
-            public void internalFrameOpened(InternalFrameEvent e) {
-
-            }
+            public void internalFrameOpened(InternalFrameEvent e) {}
 
             @Override
-            public void internalFrameClosing(InternalFrameEvent e) {
+            public void internalFrameClosing(InternalFrameEvent e) {// Добавление слушателя для обработки события закрытия окна
                 if (confirmClosing[0]) {
                     return;
                 }
+                // Показ диалогового окна для подтверждения закрытия
                 Object[] options = {getLocalizedString("confirm.closing.YES"), getLocalizedString("confirm.closing.NO")};
                 int result = JOptionPane.showOptionDialog(
-                        LogWindow.this, // передаем текущий фрейм в качестве родительского компонента
+                        LogWindow.this,
                         getLocalizedString("confirm.closing.question"),
                         getLocalizedString("confirm.closing.title"),
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE,
                         null,
                         options,
-                        options[0] // Возвращает значение для YES
+                        options[0]
                 );
 
                 if (result == JOptionPane.NO_OPTION) {
                     confirmClosing[0] = false;
                     return;
                 }
-
                 dispose();
             }
 
@@ -72,7 +71,7 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
             @Override
             public void internalFrameDeactivated(InternalFrameEvent e) {}
         });
-
+        // Добавление панели с игровым визуализатором на поле
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(m_logContent, BorderLayout.CENTER);
         getContentPane().add(panel);
@@ -80,6 +79,7 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
         updateLogContent();
     }
 
+    // Метод для обновления содержимого логов
     private void updateLogContent() {
         StringBuilder content = new StringBuilder();
         for (LogEntry entry : m_logSource.all()) {
@@ -89,19 +89,23 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
         m_logContent.invalidate();
     }
 
-    private static ResourceBundle getBundle(String baseName, Locale locale) {
-        return ResourceBundle.getBundle(baseName, locale);
+    // Получение строки для заданного языка
+    private static ResourceBundle getBundle(Locale locale) {
+        return ResourceBundle.getBundle("gui.resources.messages", locale);
     }
 
+    // Метод для получения локализованной строки по ключу
     private String getLocalizedString(String key) {
-        ResourceBundle bundle = getBundle("gui.resources.messages", getLocale());
+        ResourceBundle bundle = getBundle(getLocale());
         return bundle.getString(key);
     }
 
+    // Метод для получения текущего языка
     public Locale getLocale() {
         return Locale.getDefault();
     }
 
+    // Обработчик изменения логов
     @Override
     public void onLogChanged() {
         EventQueue.invokeLater(this::updateLogContent);

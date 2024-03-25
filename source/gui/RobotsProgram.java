@@ -8,16 +8,21 @@ import javax.swing.UIManager;
 
 public class RobotsProgram
 {
-    public static void main(String[] args) {
-      try {
-        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      SwingUtilities.invokeLater(() -> {
-        MainApplicationFrame frame = new MainApplicationFrame();
-        frame.pack();
-        frame.setVisible(true);
-        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-      });
-    }}
+  // Запуск программы
+  public static void main(String[] args) {
+    try {
+      // Установка внешнего вида приложения на Nimbus
+      UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    // Запуск GUI в потоке обработки событий
+    SwingUtilities.invokeLater(() -> {
+      // Создание и настройка основного фрейма приложения
+      MainApplicationFrame frame = new MainApplicationFrame();
+      frame.pack(); // Устанавливаем размер содержимого окна
+      frame.setVisible(true); // Делаем окно видимым
+      frame.setExtendedState(Frame.MAXIMIZED_BOTH); // Окно на весь экран
+    });
+  }
+}

@@ -47,7 +47,7 @@ public class GameVisualizer extends JPanel
             {
                 onModelUpdateEvent();
             }
-        }, 0, 8);
+        }, 0, 7);
 
         addMouseListener(new MouseAdapter() {
             @Override

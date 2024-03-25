@@ -9,14 +9,14 @@ public class LanguageChangeButton extends JMenuItem {
     private final MainApplicationFrame mainApplicationFrame;
 
     public LanguageChangeButton(String title, MainApplicationFrame mainApplicationFrame) {
-        super(title);
+        super(title); //Нажали кнопку выбора языка
         this.mainApplicationFrame = mainApplicationFrame;
-        addActionListener(new LanguageChangeListener());
+        addActionListener(new LanguageChangeListener()); //Добавляем слушателя
 
-        if (title.equals(mainApplicationFrame.getLocalizedString("language.english", mainApplicationFrame.getLocale()))) {
-            setText("English");
-        } else if (title.equals(mainApplicationFrame.getLocalizedString("language.russian", mainApplicationFrame.getLocale()))) {
-            setText("Русский");
+        if (title.equals(MainApplicationFrame.getLocalizedString("language.english", mainApplicationFrame.getLocale()))) {
+            setText("English"); // Установка языка на английский (Потом через get заберем)
+        } else if (title.equals(MainApplicationFrame.getLocalizedString("language.russian", mainApplicationFrame.getLocale()))) {
+            setText("Русский");// Установка языка на русский (Потом через get заберем)
         }
     }
 
@@ -26,8 +26,10 @@ public class LanguageChangeButton extends JMenuItem {
             String selectedLanguage = getText();
             if (selectedLanguage.equals("English")) {
                 mainApplicationFrame.changeLocale(Locale.ENGLISH);
-            } else if (selectedLanguage.equals("Русский")) {
-                mainApplicationFrame.changeLocale(new Locale("ru", "RU"));
+            } else {
+                if (selectedLanguage.equals("Русский")) {
+                    mainApplicationFrame.changeLocale(new Locale("ru", "RU"));
+                }
             }
         }
     }

@@ -5,16 +5,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.List;
 
-/**
- * Что починить:
- * 1. Этот класс порождает утечку ресурсов (связанные слушатели оказываются
- * удерживаемыми в памяти)
- * 2. Этот класс хранит активные сообщения лога, но в такой реализации он
- * их лишь накапливает. Надо же, чтобы количество сообщений в логе было ограничено
- * величиной m_iQueueLength (т.е. реально нужна очередь сообщений
- * ограниченного размера)
- */
-
 public class LogWindowSource {
     private final int m_iQueueLength; // Размер очереди
     private final BlockingQueue<LogEntry> m_messages; // Хранит сообщения логов
@@ -70,8 +60,7 @@ public class LogWindowSource {
     }
 
     private void updateActiveListeners() {
-        List<LogChangeListener> listeners = new ArrayList<>(m_listeners);
-        m_activeListeners = listeners; // Обновляем активных слушателей
+        m_activeListeners = new ArrayList<>(m_listeners); // Обновляем активных слушателей
     }
 
     public int size() { // Возвращает текущий размер сообщений в логе
